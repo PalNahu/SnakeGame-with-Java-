@@ -12,25 +12,38 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
     int alto;
 
     public void move() {
-        if (colisiónComidaSerpiente(cabezaSerpiente, comida)) {
+        if (colisión(cabezaSerpiente, comida)) {
             cuerpoSerpiente.add(new Tile(comida.x, comida.y));
             colocarComida();
         }
 
-        for (int i = cuerpoSerpiente.size() - 1; i >= 0; i--){
+        for (int i = cuerpoSerpiente.size() - 1; i >= 0; i--) {
             Tile parteSerpiente = cuerpoSerpiente.get(i);
-            if(i ==0){
+            if (i == 0) {
                 parteSerpiente.x = cabezaSerpiente.x;
                 parteSerpiente.y = cabezaSerpiente.y;
-            }else{
-                Tile antParteSerpiente = cuerpoSerpiente.get(i-1);
+            } else {
+                Tile antParteSerpiente = cuerpoSerpiente.get(i - 1);
                 parteSerpiente.x = antParteSerpiente.x;
                 parteSerpiente.y = antParteSerpiente.y;
             }
         }
 
-            cabezaSerpiente.x += velocidadX;
+        cabezaSerpiente.x += velocidadX;
         cabezaSerpiente.y += velocidadY;
+
+        //Fin del juego
+        for (int i = 0; i < cuerpoSerpiente.size(); i++) {
+            Tile parteSerpiente = cuerpoSerpiente.get(i);
+            if (colisión(parteSerpiente, cabezaSerpiente)) {
+                finDelJuego = true;
+            }
+
+        }
+
+        if(cabezaSerpiente.x*tileSize < 0 || cabezaSerpiente.y*tileSize > ancho || cabezaSerpiente.y*tileSize < 0 || cabezaSerpiente.y*tileSize > alto){
+            finDelJuego = true;
+        }
 
     }
 
@@ -38,6 +51,9 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         move();
         repaint();
+        if (finDelJuego) {
+            loop.stop();
+        }
     }
 
     @Override
@@ -89,6 +105,8 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
     int velocidadX;
     int velocidadY;
 
+    boolean finDelJuego = false;
+
     SnakeGame(int ancho, int alto) {
         this.ancho = ancho;
         this.alto = alto;
@@ -106,6 +124,7 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         velocidadX = 0;
         velocidadY = 0;
 
+
     }
 
     public void paintComponent(Graphics g) {
@@ -115,14 +134,27 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
 
     public void draw(Graphics g) {
         g.setColor(Color.red);
-        g.fillRect(comida.x * tileSize, comida.y * tileSize, tileSize, tileSize);
+        //g.fillRect(comida.x * tileSize, comida.y * tileSize, tileSize, tileSize);
+        g.fill3DRect(comida.x * tileSize, comida.y * tileSize, tileSize, tileSize, true);
 
         g.setColor(Color.green);
-        g.fillRect(cabezaSerpiente.x * tileSize, cabezaSerpiente.y * tileSize, tileSize, tileSize);
+       // g.fillRect(cabezaSerpiente.x * tileSize, cabezaSerpiente.y * tileSize, tileSize, tileSize);
+        g.fill3DRect(cabezaSerpiente.x * tileSize, cabezaSerpiente.y * tileSize, tileSize, tileSize, true);
+
 
         for (int i = 1; i < cuerpoSerpiente.size(); i++) {
             Tile parteSerpiente = cuerpoSerpiente.get(i);
-            g.fillRect(parteSerpiente.x * tileSize, parteSerpiente.y * tileSize, tileSize, tileSize);
+            //g.fillRect(parteSerpiente.x * tileSize, parteSerpiente.y * tileSize, tileSize, tileSize);
+            g.fill3DRect(parteSerpiente.x * tileSize, parteSerpiente.y * tileSize, tileSize, tileSize, true);
+        }
+
+        g.setFont(new Font("Arial", Font.PLAIN, 16));
+        if (finDelJuego){
+            g.setColor(Color.red);
+            g.drawString("Fin del juego " + String.valueOf(cuerpoSerpiente.size()), tileSize - 16, tileSize);
+
+        }else{
+            g.drawString("Score " + String.valueOf(cuerpoSerpiente.size()), tileSize-16, tileSize);
         }
 
     }
@@ -132,7 +164,7 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         comida.y = random.nextInt(alto / tileSize);
     }
 
-    public boolean colisiónComidaSerpiente(Tile tile1, Tile tile2) {
+    public boolean colisión(Tile tile1, Tile tile2) {
         return tile1.x == tile2.x && tile1.y == tile2.y;
     }
 }

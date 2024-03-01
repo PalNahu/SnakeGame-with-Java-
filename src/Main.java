@@ -17,6 +17,7 @@ public class Main {
             SnakeGame snakeGame = new SnakeGame(ancho, alto);
             ventana.add(snakeGame);
             snakeGame.requestFocus();
+            ventana.pack();
         });
     }
 }
